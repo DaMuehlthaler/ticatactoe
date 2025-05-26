@@ -1,6 +1,6 @@
 {
 	"devDependencies": {
-		"daisyui": "^5.0.35"
+		"daisyui": "^5.0.37"
 	},
 	"dependencies": {
 		"pocketbase-sdk": "^0.0.9"
