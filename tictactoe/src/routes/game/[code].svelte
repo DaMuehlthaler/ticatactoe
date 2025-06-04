@@ -14,8 +14,7 @@
 	let board = Array(9).fill(null);
 	let myMoves = [];
 
-	let waitingForPlayer = false;
-
+	// 🟢 Laden der Lobby + Realtime Sync
 	onMount(async () => {
 		try {
 			const result = await pb.collection('lobbies').getFirstListItem(`code="${code}"`, {
@@ -25,24 +24,11 @@
 			lobby = result;
 			board = [...lobby.boardState];
 
-			// Zugriffsschutz: nur player1 oder player2 dürfen in die Lobby
-			if (currentUser !== lobby.player1 && currentUser !== lobby.player2) {
-				error = 'Du bist kein Teilnehmer dieser Lobby.';
-				setTimeout(() => goto('/lobby/join'), 2000);
-				return;
-			}
-
-			// Spieler-Zeichen setzen
 			mySymbol = currentUser === lobby.player1 ? 'X' : 'O';
 
-			// Warten auf zweiten Spieler?
-			waitingForPlayer = !lobby.player1 || !lobby.player2;
-
-			// Realtime Sync
 			unsubscribe = await pb.collection('lobbies').subscribe(lobby.id, (e) => {
 				lobby = e.record;
 				board = [...e.record.boardState];
-				waitingForPlayer = !lobby.player1 || !lobby.player2;
 			});
 		} catch (err) {
 			console.error(err);
@@ -55,13 +41,13 @@
 		if (unsubscribe) unsubscribe();
 	});
 
+	// 🔁 Spiellogik mit 3-Stein-Regel
 	async function playMove(index) {
-		if (!lobby || waitingForPlayer) return;
+		if (!lobby) return;
 		if (lobby.winner) return;
 		if (lobby.currentTurn !== mySymbol) return;
 		if (board[index]) return;
 
-		// 3-Stein-Regel anwenden
 		if (myMoves.length >= 3) {
 			const removeIndex = myMoves.shift();
 			board[removeIndex] = null;
@@ -70,11 +56,9 @@
 		myMoves.push(index);
 		board[index] = mySymbol;
 
-		// Sieg prüfen
 		let winner = null;
 		if (checkWin(board, mySymbol)) {
 			winner = mySymbol;
-			// Highscore speichern
 			await pb.collection('highscores').create({
 				userId: currentUser,
 				lobbyId: lobby.id,
@@ -82,7 +66,6 @@
 			});
 		}
 
-		// Update Lobby in DB
 		await pb.collection('lobbies').update(lobby.id, {
 			boardState: board,
 			currentTurn: mySymbol === 'X' ? 'O' : 'X',
@@ -91,6 +74,7 @@
 		});
 	}
 
+	// 🧠 Gewinnüberprüfung
 	function checkWin(b, symbol) {
 		const wins = [
 			[0, 1, 2],
@@ -105,29 +89,17 @@
 		return wins.some((line) => line.every((i) => b[i] === symbol));
 	}
 
-	async function resetLobby() {
-		if (pb.authStore.model.id !== lobby.player1) return; // Nur Player1 darf zurücksetzen
-
-		await pb.collection('lobbies').update(lobby.id, {
-			boardState: Array(9).fill(null),
-			currentTurn: 'X',
-			moves: 0,
-			winner: null
-		});
-	}
-
+	// 🧹 Lobby verlassen (optional Reset)
 	async function leaveLobby() {
-		if (!lobby) return;
-
-		// Bestimme, ob user player1 oder player2 ist
-		const updateData = {};
-		if (pb.authStore.model.id === lobby.player1) {
-			updateData.player1 = null;
-		} else if (pb.authStore.model.id === lobby.player2) {
-			updateData.player2 = null;
+		// Optional: cleanup nur wenn Spiel noch läuft
+		if (!lobby.winner && (mySymbol === 'X' || mySymbol === 'O')) {
+			await pb.collection('lobbies').update(lobby.id, {
+				boardState: Array(9).fill(null),
+				currentTurn: 'X',
+				moves: 0,
+				winner: null
+			});
 		}
-
-		await pb.collection('lobbies').update(lobby.id, updateData);
 		goto('/lobby');
 	}
 </script>
@@ -140,10 +112,7 @@
 	<h2 class="mb-4 text-xl font-bold">Lobby: {lobby.code}</h2>
 	<p>Du spielst als: <strong>{mySymbol}</strong></p>
 	<p class="mb-2">Aktueller Zug: {lobby.currentTurn}</p>
-
-	{#if waitingForPlayer}
-		<p class="font-semibold text-yellow-600">⏳ Warten auf zweiten Spieler...</p>
-	{:else if lobby.winner}
+	{#if lobby.winner}
 		<p class="text-lg font-semibold text-green-600">🎉 Spieler {lobby.winner} hat gewonnen!</p>
 	{/if}
 
@@ -152,12 +121,13 @@
 			<button
 				class="btn btn-square text-2xl"
 				on:click={() => playMove(i)}
-				disabled={cell || lobby.currentTurn !== mySymbol || lobby.winner || waitingForPlayer}
+				disabled={cell || lobby.currentTurn !== mySymbol || lobby.winner}
 			>
 				{cell}
 			</button>
 		{/each}
 	</div>
+
+	<!-- Button zum Verlassen -->
+	<button class="btn btn-error mt-4" on:click={leaveLobby}>🚪 Lobby verlassen</button>
 {/if}
-<!-- 🆕 Hier kommt der Button hin -->
-<button class="btn btn-error mt-4" on:click={leaveLobby}> 🚪 Lobby verlassen </button>

@@ -1,4 +1,15 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
-<button class="btn">Oba du Oba</button>
-<a href="/highscores" class="btn btn-secondary mt-4">Zu den Highscores</a>
+<!-- src/routes/lobby/+page.svelte -->
+<script>
+	import { goto } from '$app/navigation';
+</script>
+
+<h1 class="mb-4 text-2xl font-bold">Lobby-Menü</h1>
+
+<div class="flex flex-col gap-2">
+	<button class="btn btn-primary" on:click={() => goto('/lobby/create')}
+		>🎮 Neue Lobby erstellen</button
+	>
+	<button class="btn btn-secondary" on:click={() => goto('/lobby/join')}>🔑 Lobby beitreten</button>
+	<button class="btn" on:click={() => goto('/lobby/login.svelte')}>🔐 Login</button>
+	<button class="btn" on:click={() => goto('/lobby/register.svelte')}>👤 Registrieren</button>
+</div>
