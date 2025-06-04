@@ -9,7 +9,7 @@
 	<button class="btn btn-primary" on:click={() => goto('/lobby/create')}
 		>🎮 Neue Lobby erstellen</button
 	>
-	<button class="btn btn-secondary" on:click={() => goto('/lobby/join')}>🔑 Lobby beitreten</button>
-	<button class="btn" on:click={() => goto('/lobby/login.svelte')}>🔐 Login</button>
-	<button class="btn" on:click={() => goto('/lobby/register.svelte')}>👤 Registrieren</button>
+	<button class="btn btn-secondary" on:click={() => goto('/lobby/join')}>Lobby beitreten</button>
+	<button class="btn btn-secondary" on:click={() => goto('/lobby/register')}>Registrieren</button>
+	<button class="btn btn-secondary" on:click={() => goto('/lobby/login')}>Login</button>
 </div>

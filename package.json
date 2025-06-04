@@ -3,6 +3,7 @@
 		"daisyui": "^5.0.37"
 	},
 	"dependencies": {
+		"pocketbase": "^0.26.0",
 		"pocketbase-sdk": "^0.0.9"
 	}
 }

@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      pocketbase:
+        specifier: ^0.26.0
+        version: 0.26.0
       pocketbase-sdk:
         specifier: ^0.0.9
         version: 0.0.9
@@ -120,6 +123,9 @@ packages:
   pocketbase-sdk@0.0.9:
     resolution: {integrity: sha512-O+h5vhgxPBRzhPYiXRs2sb22ED3xNxstLp8243RWcFnfDF08j8VHsTRbVNwzVF3KcSEOSCACC3+Qp8bAYuAbzA==}
 
+  pocketbase@0.26.0:
+    resolution: {integrity: sha512-WBBeOgz4Jnrd7a1KEzSBUJqpTortKKCcp16j5KoF+4tNIyQHsmynj+qRSvS56/RVacVMbAqO8Qkfj3N84fpzEw==}
+
   proxy-from-env@1.1.0:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
 
@@ -229,5 +235,7 @@ snapshots:
       path-browserify: 1.0.1
     transitivePeerDependencies:
       - debug
+
+  pocketbase@0.26.0: {}
 
   proxy-from-env@1.1.0: {}
